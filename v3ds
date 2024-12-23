@@ -200,7 +200,7 @@ async def capture_output(process, keyword):
     return None
 
 async def create_server_task(interaction):
-    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds.", color=0x00ff00))
+    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds. Powered By [ElemantalMc](https://discord.gg/9ePTuaFVUN)", color=0x00ff00))
     user = str(interaction.user)
     if count_user_servers(user) >= SERVER_LIMIT:
         await interaction.followup.send(embed=discord.Embed(description="```Error: VPS Limit-reached```", color=0xff0000))
@@ -287,6 +287,51 @@ async def list_servers(interaction: discord.Interaction):
 async def remove_server(interaction: discord.Interaction, container_name: str):
     user = str(interaction.user)
     container_id = get_container_id_from_database(user, container_name)
+
+# Node Status Command
+def get_node_status():
+    try:
+        containers = client.containers.list(all=True)
+        container_status = "\n".join([f"{container.name} - {container.status}" for container in containers]) or "No containers running."
+
+        # Get system-wide memory usage using `os` module
+        with open('/proc/meminfo', 'r') as f:
+            meminfo = f.read()
+        mem_total = int(re.search(r'MemTotal:\s+(\d+)', meminfo).group(1)) / 1024  # Convert to MB
+        mem_free = int(re.search(r'MemFree:\s+(\d+)', meminfo).group(1)) / 1024  # Convert to MB
+        mem_available = int(re.search(r'MemAvailable:\s+(\d+)', meminfo).group(1)) / 1024  # Convert to MB
+
+        memory_used = mem_total - mem_available
+        memory_percentage = (memory_used / mem_total) * 100 if mem_total else 0
+
+        node_info = {
+            "containers": container_status,
+            "memory_total": mem_total,
+            "memory_used": memory_used,
+            "memory_percentage": memory_percentage
+        }
+        return node_info
+    except Exception as e:
+        return str(e)
+
+@bot.tree.command(name="node", description="Show the current status of the VPS node.")
+async def node_status(interaction: discord.Interaction):
+    try:
+        node_info = get_node_status()
+
+        if isinstance(node_info, str):  # If there's an error
+            await interaction.response.send_message(embed=discord.Embed(description=f"### Error fetching node status: {node_info}", color=0xff0000))
+            return
+
+        # Format the status message
+        embed = discord.Embed(title="VPS Node1 Status", color=0x00ff00)
+        embed.add_field(name="Containers", value=node_info["containers"], inline=False)
+        embed.add_field(name="Memory Usage", value=f"{node_info['memory_used']:.2f} / {node_info['memory_total']:.2f} MB ({node_info['memory_percentage']:.2f}%)", inline=False)
+
+        await interaction.response.send_message(embed=embed)
+
+    except Exception as e:
+        await interaction.response.send_message(embed=discord.Embed(description=f"### Failed to fetch node status: {str(e)}", color=0xff0000))
 
     if not container_id:
         await interaction.response.send_message(embed=discord.Embed(description="No Instance found for your user with that name.", color=0xff0000))
