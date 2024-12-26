@@ -20,7 +20,7 @@ intents = discord.Intents.default()
 intents.messages = False
 intents.message_content = False
 
-bot = commands.Bot(command_prefix='/', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 client = docker.from_env()
 
 def add_to_database(user, container_name, ssh_command):
