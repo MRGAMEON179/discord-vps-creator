@@ -200,7 +200,7 @@ async def capture_output(process, keyword):
     return None
 
 async def create_server_task(interaction):
-    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds. Powered By [ElemantalMc](https://discord.gg/9ePTuaFVUN)", color=0x00ff00))
+    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds. Powered By [infinityCloud](https://discord.gg/s5bUq6z83j)", color=0x00ff00))
     user = str(interaction.user)
     if count_user_servers(user) >= SERVER_LIMIT:
         await interaction.followup.send(embed=discord.Embed(description="```Error: VPS Limit-reached```", color=0xff0000))
