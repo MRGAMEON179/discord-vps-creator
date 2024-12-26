@@ -329,7 +329,8 @@ async def bal(interaction: discord.Interaction):
     user_id = interaction.user.id
     credits = user_credits.get(user_id, 0)
           await interaction.response.send_message(f"You have {credits} credits.")      
-      
+
+
 # Node Status Command
 def get_node_status():
     try:
