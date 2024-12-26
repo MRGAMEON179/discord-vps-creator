@@ -200,7 +200,7 @@ async def capture_output(process, keyword):
     return None
 
 async def create_server_task(interaction):
-    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds. Powered By [infinityCloud](https://discord.gg/s5bUq6z83j)", color=0x00ff00))
+    await interaction.response.send_message(embed=discord.Embed(description="## Creating VPS, This might take a few seconds. Powered By [InfinityCloud(https://discord.gg/s5bUq6z83j)", color=0x00ff00))
     user = str(interaction.user)
     if count_user_servers(user) >= SERVER_LIMIT:
         await interaction.followup.send(embed=discord.Embed(description="```Error: VPS Limit-reached```", color=0xff0000))
@@ -288,41 +288,6 @@ async def remove_server(interaction: discord.Interaction, container_name: str):
     user = str(interaction.user)
     container_id = get_container_id_from_database(user, container_name)
 
-# In-memory database for user credits
-user_credits = {}
-
-# Cuty.io API key (Your account key)
-API_KEY = 'ebe681f9e37ef61fcfd756396'
-
-# Slash command: earnCredit
-@bot.tree.command(name="earncredit", description="Generate a URL to shorten and earn credits.")
-async def earncredit(interaction: discord.Interaction):
-    print("Received request to shorten URL")
-    user_id = interaction.user.id
-
-    # Define a default URL to shorten
-    default_url = "https://adfoc.us/868719107869757"  # Change this as needed
-
-    # Make a request to Cuty.io API to shorten the default URL
-    api_url = f"https://cutt.ly/api/api.php?key={API_KEY}&short={default_url}"
-    print(f"Making API call to: {api_url}")
-    response = requests.get(api_url).json()
-    print(f"API response: {response}")
-
-    # Check if the URL was successfully shortened
-    if response['url']['status'] == 7:
-        shortened_url = response['url']['shortLink']
-        credits_earned = 1  # Update to 1 credit for each shortening
-
-        # Add credits to user
-        user_credits[user_id] = user_credits.get(user_id, 0) + credits_earned
-
-        await interaction.response.send_message(f"Success! Here's your shortened URL: {shortened_url}. You earned {credits_earned} credit!")
-    else:
-        # Handle API error messages
-        error_message = response['url'].get('title', 'Failed to generate a shortened URL. Please try again.')
-        await interaction.response.send_message(error_message)
-
 # Node Status Command
 def get_node_status():
     try:
@@ -349,40 +314,6 @@ def get_node_status():
     except Exception as e:
         return str(e)
 
-@app_commands.describe(vps_id="ID of the VPS to renew")
-async def renew(interaction: discord.Interaction, vps_id: str):
-    user_id = str(interaction.user.id)
-    credits = user_credits.get(user_id, 0)
-
-    # Check if user has enough credits
-    if credits < 2:
-        await interaction.response.send_message(embed=discord.Embed(
-            description="You don't have enough credits to renew the VPS. You need 2 credits.",
-            color=0xff0000))
-        return
-
-    # Get VPS from the database (check if VPS exists for the user)
-    container_id = get_container_id_from_database(user_id, vps_id)
-    if not container_id:
-        await interaction.response.send_message(embed=discord.Embed(
-            description=f"VPS with ID {vps_id} not found.",
-            color=0xff0000))
-        return
-
-    # Deduct credits
-    user_credits[user_id] -= 2
-
-    # Renew VPS: Add 8 days to the current expiry
-    renewal_date = datetime.now() + timedelta(days=8)
-    vps_renewals[vps_id] = renewal_date
-
-    # You may also want to log this in a persistent database, not just in memory
-
-    await interaction.response.send_message(embed=discord.Embed(
-        description=f"VPS {vps_id} has been renewed for 8 days. New expiry date: {renewal_date.strftime('%Y-%m-%d')}. "
-                    f"You now have {user_credits[user_id]} credits remaining.",
-      color=0x00ff00))          
-          
 @bot.tree.command(name="node", description="Show the current status of the VPS node.")
 async def node_status(interaction: discord.Interaction):
     try:
