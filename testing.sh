@@ -36,7 +36,7 @@ echo "Building Docker Image"
 sudo docker build -t ubuntu-22.04-with-tmate .
 echo Built successfully
 echo "Downloading main.py from the GitHub repository..."
-wget -O main.py https://raw.githubusercontent.com/MRGAMEON179/discord-vps-creator/refs/heads/main/v3dss
+wget -O main.py https://raw.githubusercontent.com/MRGAMEON179/Workinga/refs/heads/main/main.py
 echo Downloaded successfully
 echo "Installing Python packages: discord and docker..."
 pip3 install discord docker
